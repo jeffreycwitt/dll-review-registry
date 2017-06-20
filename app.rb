@@ -9,8 +9,14 @@ require 'httparty'
 
 
 configure do
-  db = Mongo::Client.new(['127.0.0.1:27017'], :database => "test")
-  set :mongo_db, db[:test]
+  if settings.development?
+    dbname = "test"
+    db = Mongo::Client.new(['127.0.0.1:27017'], :database => dbname)
+  else
+    dbname = ENV['MONGODB_URI'].split("/").last
+    db = Mongo::Client.new(ENV['MONGODB_URI'], :database => dbname)
+  end
+  set :mongo_db, db[dbname.to_sym]
   set :server, :puma
   set :bind, "0.0.0.0"
   set :protection, except: [:frame_options, :json_csrf]

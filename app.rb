@@ -69,11 +69,11 @@ post '/reviews/create' do
   review_summary = params[:review_summary]
   review_badge_number = params[:review_badge_number]
   if review_badge_number == "1"
-    review_badge = "http://localhost:4567/maa-badge-working.svg"
-    badge_rubric = "http://localhost:4567/rubric/maa#green"
+    review_badge = "http://dll-review-registry.herokuapp.com/maa-badge-working.svg"
+    badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#green"
   elsif review_badge_number == "2"
-    review_badge = "http://localhost:4567/maa-badge.svg"
-    badge_rubric = "http://localhost:4567/rubric/maa#gold"
+    review_badge = "http://dll-review-registry.herokuapp.com/maa-badge.svg"
+    badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#gold"
   end
 
   response = HTTParty.get(review_text_url)

@@ -1,0 +1,24 @@
+{
+    "@id": "http://digitallatin.org/reviews/f3ee46cf-0941-44fd-a93f-581e93b22da3",
+    "review-metadata":
+    {
+        "reviewing-society": "Medieval Academy of America",
+        "date": "2016-05-04",
+        "level-approved": "print-ready",
+        "badge-url": "http://localhost:4567/maa-badge-working.svg",
+        "review-writeup": "http://digitallatin.org/f3ee46cf-0941-44fd-a93f-581e93b22da3/text",
+        "origin-source": {
+          "git-commit": "8515033d005e2daaa0a9ca573568248e92ce9831",
+          "github-url": "https://raw.githubusercontent.com/scta-texts/summahalensis/8515033d005e2daaa0a9ca573568248e92ce9831/ahsh-l1p1i1t1q1c1/ahsh-l1p1i1t1q1c1.xml",
+          "shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+          "version-number": "1.0.0"
+        },
+        "dll-source": {
+          "git-commit": "feaetee",
+          "git-url": "4848ade838a38a38",
+          "shasum": "fefae8d835d2",
+          "version-number": "1.0.0"
+        },
+        "author": "Jeff Witt"
+    }
+}

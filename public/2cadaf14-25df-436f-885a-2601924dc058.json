@@ -1,0 +1,18 @@
+{
+  "@id": "http://digitallatin.org/reviews/2cadaf14-25df-436f-885a-2601924dc058",
+  "review-metadata": {
+    "review-society": "maa",
+    "date": "2017-06-19 20:07:57 -0400",
+    "badge-url": "http://localhost:4567/maa-badge.svg",
+    "review-report": "http://digitallatin.org/2cadaf14-25df-436f-885a-2601924dc058/report",
+    "review-summary": "test",
+    "origin-source": {
+      "github-url": "https://raw.githubusercontent.com/scta-texts/summahalensis/25a5b3e07fe6fb3a562fc00d5f9ebce8b1b12af4/ahsh-l1p1i1t1q1c1/ahsh-l1p1i1t1q1c1.xml",
+      "shasum": "d5365a7cc627dd6c1d27e914ef79ae3def4544d514c3848ee5437ffd68fa52b5"
+    },
+    "dll-source": {
+      "git-url": "https://raw.githubusercontent.com/scta-texts/summahalensis/25a5b3e07fe6fb3a562fc00d5f9ebce8b1b12af4/ahsh-l1p1i1t1q1c1/ahsh-l1p1i1t1q1c1.xml",
+      "shasum": "d5365a7cc627dd6c1d27e914ef79ae3def4544d514c3848ee5437ffd68fa52b5"
+    }
+  }
+}

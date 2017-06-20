@@ -1,0 +1,42 @@
+<div class="container">
+  <h1>Review <%= @id %></h1>
+  <table class="table">
+    <tr>
+      <td>Review Society</td>
+      <td><%= @document["review-metadata"]["review-society"] %></td>
+    </tr>
+    <tr>
+      <td>Imprimatur</td>
+      <td><img src="<%= @document['review-metadata']['badge-url'] %>"/></td>
+    </tr>
+    <tr>
+      <td>Date</td>
+      <td><%= @document["review-metadata"]["date"] %></td>
+    </tr>
+    <tr>
+      <td>Review Summary</td>
+      <td><%= @document["review-metadata"]["review-summary"] %></td>
+    </tr>
+    <tr>
+      <td>Shasum</td>
+      <td><%= @document["review-metadata"]["origin-source"]["shasum"] %></td>
+    </tr>
+    <tr>
+      <td>Raw Source Url</td>
+      <td><a href="<%= @document['review-metadata']['origin-source']['github-url'] %>"><%= @document["review-metadata"]["origin-source"]["github-url"] %></td>
+    </tr>
+
+  </table>
+</div>
+<!--
+"origin-source": {
+"git-commit": "18183asdfasdjff13rwq",
+"github-url": "http://github.com/scta-text/18183asdfasdjff13rwq/pg-b1q1",
+"shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+"version-number": "1.0.0"
+},
+"dll-source": {
+"git-commit": "18183asdfasdjff13rwq",
+"git-url": "http://github.com/scta-text/18183asdfasdjff13rwq/pg-b1q1",
+"shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+"version-number": "1.0.0" -->

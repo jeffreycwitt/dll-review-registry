@@ -1,0 +1,23 @@
+{
+  "@id": "http://digitallatin.org/reviews/9021ddd8-b580-4818-83ff-6064c081583d",
+  "review-metadata": {
+    "review-society": "mongo",
+    "date": "2017-06-12 10:00:14 -0400",
+    "badge-url": null,
+    "review-report": "http://digitallatin.org/9021ddd8-b580-4818-83ff-6064c081583d/report",
+    "review-summary": "mongo",
+    "origin-source": {
+      "git-commit": "mongo",
+      "github-url": "mongo",
+      "shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+      "version-number": "1.0.0"
+    },
+    "dll-source": {
+      "git-commit": "mongo",
+      "git-url": "mongo",
+      "shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+      "version-number": "1.0.0"
+    },
+    "author": "John Doe"
+  }
+}

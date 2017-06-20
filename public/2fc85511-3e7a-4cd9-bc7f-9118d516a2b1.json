@@ -1,0 +1,23 @@
+{
+  "@id": "http://digitallatin.org/reviews/2fc85511-3e7a-4cd9-bc7f-9118d516a2b1",
+  "review-metadata": {
+    "review-society": "MAA",
+    "date": "2017-06-02 08:56:02 -0400",
+    "badge-url": "http://localhost:4567/maa-badge-working.svg",
+    "review-report": "http://digitallatin.org/2fc85511-3e7a-4cd9-bc7f-9118d516a2b1/report",
+    "review-summary": "test2",
+    "origin-source": {
+      "git-commit": "test2",
+      "github-url": "test2",
+      "shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+      "version-number": "1.0.0"
+    },
+    "dll-source": {
+      "git-commit": "test2",
+      "git-url": "test2",
+      "shasum": "b0342403c01e169116465168f7c97eea811e97dc",
+      "version-number": "1.0.0"
+    },
+    "author": "John Doe"
+  }
+}

@@ -12,6 +12,9 @@ configure do
   if settings.development?
     dbname = "test"
     db = Mongo::Client.new(['127.0.0.1:27017'], :database => dbname)
+  elsif settings.environment == :docker
+    dbname = "test"
+    db = Mongo::Client.new(['mongodb:27017'], :database => dbname)
   else
     dbname = ENV['MONGODB_URI'].split("/").last
     db = Mongo::Client.new(ENV['MONGODB_URI'], :database => dbname)
@@ -100,13 +103,13 @@ post '/reviews/create' do
           }
       }
   }
-  filename = "public/" + id + '.json'
-  final_content = JSON.pretty_generate(review_content)
+  #filename = "public/" + id + '.json'
+  #final_content = JSON.pretty_generate(review_content)
   db = settings.mongo_db
   db.insert_one(review_content)
-  File.open(filename, 'w') { |file|
-    file.write(final_content)
-  }
+  #File.open(filename, 'w') { |file|
+  #  file.write(final_content)
+  #}
   @id = id
   erb :create_completed
 

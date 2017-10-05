@@ -11,6 +11,8 @@ gem 'bson_ext'
 gem "digest"
 gem 'multihashes'
 gem 'base58'
+gem 'gon-sinatra'
+gem 'octokit'
 
 group :development do
 	gem 'pry'

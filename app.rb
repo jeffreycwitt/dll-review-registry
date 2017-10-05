@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'sinatra'
 require 'securerandom'
 require 'mongo'
@@ -7,7 +8,14 @@ require 'multihashes'
 require 'uri'
 require 'httparty'
 require 'base58'
+require 'gon-sinatra'
+require 'octokit'
 
+CLIENT_ID = ENV['CLIENT_ID']
+CLIENT_SECRET = ENV['CLIENT_SECRET']
+
+use Rack::Session::Pool
+Sinatra::register Gon::Sinatra
 
 configure do
   if settings.development?
@@ -35,9 +43,79 @@ if settings.development?
   require 'pry'
 end
 
+# authentation code taken from https://developer.github.com/v3/guides/basics-of-authentication/ and http://radek.io/2014/08/03/github-oauth-with-octokit/
+def authenticated?
+  session[:access_token]
+end
+
+def authenticate!
+  client = Octokit::Client.new
+  scopes = ['repo', 'user']
+  url = client.authorize_url(CLIENT_ID, :scope => 'repo')
+
+  redirect url
+end
+def authorized?
+  begin
+    client = Octokit::Client.new :access_token => session[:access_token]
+    data = client.user
+    username = data.login
+  rescue
+    username = ""
+  end
+  username == "jeffreycwitt"
+end
+
+
+get '/login' do
+  if !authenticated?
+    authenticate!
+  else
+    access_token = session[:access_token]
+    scopes = []
+
+    client = Octokit::Client.new \
+      :client_id => CLIENT_ID,
+      :client_secret => CLIENT_SECRET
+
+    begin
+      client.check_application_authorization access_token
+    rescue => e
+      # request didn't succeed because the token was revoked so we
+      # invalidate the token stored in the session and render the
+      # index page so that the user can start the OAuth flow again
+
+      session[:access_token] = nil
+      return authenticate!
+    end
+
+    # doesn't necessarily need to go in 'editor'
+    redirect '/'
+  end
+end
+get '/return' do
+  # get code return from github and get access token
+  session_code = request.env['rack.request.query_hash']['code']
+  result = Octokit.exchange_code_for_token(session_code, CLIENT_ID, CLIENT_SECRET)
+  session[:access_token] = result[:access_token]
+
+  redirect '/'
+end
+
 get '/' do
+  begin
+    client = Octokit::Client.new :access_token => session[:access_token]
+    data = client.user
+    @username = data.login
+    @user_url = data.html_url
+    gon.access_token = session[:access_token]
+    gon.username = @username
+  rescue
+  end
+
   erb :index
 end
+
 get '/rubric/:society' do |society|
   if society == "maa"
     erb :maa_rubric
@@ -62,69 +140,78 @@ get '/document/:id/?' do
 end
 
 get '/reviews/create' do
-  erb :create
+  if authorized?
+    erb :create
+  else
+    "not authorized"
+  end
 end
 
 post '/reviews/create' do
-  id = SecureRandom.uuid
-  date = Time.new
-  review_text_url = params[:review_text_url]
-  review_society = params[:review_society]
-  review_summary = params[:review_summary]
-  review_badge_number = params[:review_badge_number]
-  if review_badge_number == "1"
-    review_badge = "http://dll-review-registry.herokuapp.com/maa-badge-working.svg"
-    badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#green"
-  elsif review_badge_number == "2"
-    review_badge = "http://dll-review-registry.herokuapp.com/maa-badge.svg"
-    badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#gold"
+  if authorized?
+
+    id = SecureRandom.uuid
+    date = Time.new
+    review_text_url = params[:review_text_url]
+    review_society = params[:review_society]
+    review_summary = params[:review_summary]
+    review_badge_number = params[:review_badge_number]
+    if review_badge_number == "1"
+      review_badge = "http://dll-review-registry.herokuapp.com/maa-badge-working.svg"
+      badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#green"
+    elsif review_badge_number == "2"
+      review_badge = "http://dll-review-registry.herokuapp.com/maa-badge.svg"
+      badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#gold"
+    end
+
+    response = HTTParty.get(review_text_url)
+    shasum = Digest::SHA2.hexdigest(response.body)
+
+    digest = Digest::SHA256.digest(response.body)
+    multihash_binary_string = Multihashes.encode digest, 'sha2-256'
+
+
+    hexmulti = multihash_binary_string.unpack('H*').first
+    puts hexmulti
+
+
+
+
+    filename = review_text_url.split('/').last
+    File.open("tmp/#{filename}", 'w') { |file|
+      file.write(response.body)
+    }
+    puts "IPFS test"
+    ipfs_report = `ipfs add "tmp/#{filename}"`
+    puts ipfs_report
+    ipfs_hash = ipfs_report.split(" ")[1]
+
+
+    review_content =  {
+        "id": id,
+        "review-society": review_society,
+        "date": date,
+        "badge-url": review_badge,
+        "badge-rubric": badge_rubric,
+        "review-report": nil,
+        "review-summary": review_summary,
+        "sha-256": shasum,
+        "ipfs-hash": ipfs_hash,
+        "git-blob-hash": nil,
+        "url": review_text_url
+    }
+    #filename = "public/" + id + '.json'
+    #final_content = JSON.pretty_generate(review_content)
+    db = settings.mongo_db
+    db.insert_one(review_content)
+    #File.open(filename, 'w') { |file|
+    #  file.write(final_content)
+    #}
+    @id = id
+    erb :create_completed
+  else
+    "not authorized"
   end
-
-  response = HTTParty.get(review_text_url)
-  shasum = Digest::SHA2.hexdigest(response.body)
-
-  digest = Digest::SHA256.digest(response.body)
-  multihash_binary_string = Multihashes.encode digest, 'sha2-256'
-
-
-  hexmulti = multihash_binary_string.unpack('H*').first
-  puts hexmulti
-
-
-
-
-  filename = review_text_url.split('/').last
-  File.open("tmp/#{filename}", 'w') { |file|
-    file.write(response.body)
-  }
-  puts "IPFS test"
-  ipfs_report = `ipfs add "tmp/#{filename}"`
-  puts ipfs_report
-  ipfs_hash = ipfs_report.split(" ")[1]
-
-
-  review_content =  {
-      "id": id,
-      "review-society": review_society,
-      "date": date,
-      "badge-url": review_badge,
-      "badge-rubric": badge_rubric,
-      "review-report": nil,
-      "review-summary": review_summary,
-      "sha-256": shasum,
-      "ipfs-hash": ipfs_hash,
-      "git-blob-hash": nil,
-      "url": review_text_url
-  }
-  #filename = "public/" + id + '.json'
-  #final_content = JSON.pretty_generate(review_content)
-  db = settings.mongo_db
-  db.insert_one(review_content)
-  #File.open(filename, 'w') { |file|
-  #  file.write(final_content)
-  #}
-  @id = id
-  erb :create_completed
 
 end
 

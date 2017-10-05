@@ -3,13 +3,13 @@
   <h2>View Existing Reviews</h2>
   <table class="table">
     <% @reviews.each  do |review| %>
-    <% id = review["@id"].to_s.split("http://digitallatin.org/reviews/").last() %>
+    <% id = review["id"] %>
     <tr>
       <td><a href="/reviews/<%= id %>.html"><%= id %></a></td>
       <td><a href="/reviews/<%= id %>.json">JSON</a></td>
 
-      <td><%= review["review-metadata"]["date"] %></td>
-      <td><%= review["review-metadata"]["review-society"] %></td>
+      <td><%= review["date"] %></td>
+      <td><%= review["review-society"] %></td>
     </tr>
     <% end %>
   </table>

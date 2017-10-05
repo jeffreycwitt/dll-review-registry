@@ -9,6 +9,8 @@ gem 'puma'
 gem 'mongo'
 gem 'bson_ext'
 gem "digest"
+gem 'multihashes'
+gem 'base58'
 
 group :development do
 	gem 'pry'

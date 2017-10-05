@@ -1,34 +1,36 @@
+<% @documents.each do |document| %>
 <div class="container">
-  <h1>Review <%= @id %></h1>
+  <h1>Review <a href="/<%= document['@id']%>.html"><%= document["@id"] %></a></h1>
   <table class="table">
     <tr>
       <td>Review Society</td>
-      <td><%= @document["review-society"] %></td>
+      <td><%= document["review-society"] %></td>
     </tr>
     <tr>
       <td>Imprimatur</td>
-      <td><img src="<%= @document['badge-url'] %>"/> <a href="<%= @document['badge-rubric'] %>"<span class="glyphicon glyphicon-info-sign"></span></a></p> </td>
+      <td><img src="<%= document['badge-url'] %>"/> <a href="<%= document['badge-rubric'] %>"<span class="glyphicon glyphicon-info-sign"></span></a></p> </td>
     </tr>
     <tr>
       <td>Date</td>
-      <td><%= @document["date"] %></td>
+      <td><%= document["date"] %></td>
     </tr>
     <tr>
       <td>Review Summary</td>
-      <td><%= @document["review-summary"] %></td>
+      <td><%= document["review-summary"] %></td>
     </tr>
     <tr>
       <td>Shasum</td>
-      <td><%= @document["sha-256"] %></td>
+      <td><%= document["sha-256"] %></td>
     </tr>
     <tr>
       <td>IPFS Hash </td>
-      <td><a href="https:gateway.ipfs.io/ipfs/<%= @document['ipfs-hash'] %>"><%= @document["ipfs-hash"] %></a></td>
+      <td><a href="https:gateway.ipfs.io/ipfs/<%= document['ipfs-hash'] %>"><%= document["ipfs-hash"] %></a></td>
     </tr>
 
 
   </table>
 </div>
+<% end %>
 <!--
 "origin-source": {
 "git-commit": "18183asdfasdjff13rwq",

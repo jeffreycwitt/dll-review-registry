@@ -3,9 +3,10 @@ require 'securerandom'
 require 'mongo'
 require 'json/ext' # required for .to_json
 require "digest"
+require 'multihashes'
 require 'uri'
 require 'httparty'
-
+require 'base58'
 
 
 configure do
@@ -82,26 +83,38 @@ post '/reviews/create' do
   response = HTTParty.get(review_text_url)
   shasum = Digest::SHA2.hexdigest(response.body)
 
+  digest = Digest::SHA256.digest(response.body)
+  multihash_binary_string = Multihashes.encode digest, 'sha2-256'
+
+
+  hexmulti = multihash_binary_string.unpack('H*').first
+  puts hexmulti
+
+
+
+
+  filename = review_text_url.split('/').last
+  File.open("tmp/#{filename}", 'w') { |file|
+    file.write(response.body)
+  }
+  puts "IPFS test"
+  ipfs_report = `ipfs add "tmp/#{filename}"`
+  puts ipfs_report
+  ipfs_hash = ipfs_report.split(" ")[1]
+
 
   review_content =  {
-      "@id": "http://digitallatin.org/reviews/#{id}",
-      "review-metadata":
-      {
-          "review-society": review_society,
-          "date": date,
-          "badge-url": review_badge,
-          "badge-rubric": badge_rubric,
-          "review-report": "http://digitallatin.org/#{id}/report",
-          "review-summary": review_summary,
-          "origin-source": {
-            "github-url": review_text_url,
-            "shasum": shasum,
-          },
-          "dll-source": {
-            "git-url": review_text_url,
-            "shasum": shasum,
-          }
-      }
+      "id": id,
+      "review-society": review_society,
+      "date": date,
+      "badge-url": review_badge,
+      "badge-rubric": badge_rubric,
+      "review-report": nil,
+      "review-summary": review_summary,
+      "sha-256": shasum,
+      "ipfs-hash": ipfs_hash,
+      "git-blob-hash": nil,
+      "url": review_text_url
   }
   #filename = "public/" + id + '.json'
   #final_content = JSON.pretty_generate(review_content)
@@ -119,17 +132,88 @@ get '/reviews/:id.json' do |id|
   headers( "Access-Control-Allow-Origin" => "*")
   content_type :json
   db = settings.mongo_db
-  document = db.find( { "@id": "http://digitallatin.org/reviews/#{id}" } ).to_a.first
+  document = db.find( { "id": "#{id}" } ).to_a.first
   (document || {}).to_json
 
 end
 get '/reviews/:id.html' do |id|
   db = settings.mongo_db
-  @document = db.find( { "@id": "http://digitallatin.org/reviews/#{id}" } ).to_a.first
-  @id = @document["@id"].to_s.split("http://digitallatin.org/reviews/").last()
+  @document = db.find( { "id": "#{id}" } ).to_a.first
+  @id = @document["@id"]
   erb :show
 end
 
+get '/hash/:hash.json' do |id|
+  headers( "Access-Control-Allow-Origin" => "*")
+  content_type :json
+  db = settings.mongo_db
+  if id.start_with? "Qm"
+    documents = db.find( { "review-metadata.ipfs-hash": "#{id}"}).to_a
+  else
+    documents = db.find( { "review-metadata.sha-256": "#{id}"}).to_a
+  end
+  (documents || {}).to_json
+end
+get '/hash/:hash.html' do |id|
+  db = settings.mongo_db
+  if id.start_with? "Qm"
+    @documents = db.find( { "review-metadata.ipfs-hash": "#{id}"}).to_a
+  else
+    @documents = db.find( { "review-metadata.sha-256": "#{id}"}).to_a
+  end
+  erb :show_array
+end
+# api/v1 routes
+get '/api/v1/text/:hash' do |id|
+  headers( "Access-Control-Allow-Origin" => "*")
+  content_type :json
+  db = settings.mongo_db
+  if id.start_with? "Qm"
+    documents = db.find( { "ipfs-hash": "#{id}"}).to_a
+  else
+    documents = db.find( { "sha-256": "#{id}"}).to_a
+  end
+  (documents || {})
+
+  response = documents.map{|doc|
+    {
+      "id": doc["id"],
+      "review-society": doc["review-society"],
+      "date": doc["date"],
+      "badge-url": doc["badge-url"],
+      "badge-rubric": doc["badge-rubric"],
+      "review-report": doc["review-report"],
+      "review-summary": doc["review-summary"],
+      "sha-256": doc["sha-256"],
+      "ipfs-hash": doc["ipfs-hash"],
+      "git-blob-hash": doc["git-blob-hash"],
+      "url": doc["url"]
+    }
+
+  }.to_json
+end
+get '/api/v1/review/:id' do |id|
+  headers( "Access-Control-Allow-Origin" => "*")
+  content_type :json
+  db = settings.mongo_db
+
+  doc = db.find( { "id": "#{id}" } ).to_a.first
+  (doc || {})
+
+  response = {
+      "id": doc["id"],
+      "review-society": doc["review-society"],
+      "date": doc["date"],
+      "badge-url": doc["badge-url"],
+      "badge-rubric": doc["badge-rubric"],
+      "review-report": doc["review-report"],
+      "review-summary": doc["review-summary"],
+      "sha-256": doc["sha-256"],
+      "ipfs-hash": doc["ipfs-hash"],
+      "git-blob-hash": doc["git-blob-hash"],
+      "url": doc["url"]
+  }.to_json
+end
 helpers do
   # a helper method to turn a string ID
   # representation into a BSON::ObjectId

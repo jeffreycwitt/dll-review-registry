@@ -4,7 +4,6 @@ GEM
     addressable (2.5.1)
       public_suffix (~> 2.0, >= 2.0.2)
     backports (3.8.0)
-    base58 (0.1.0)
     bson (4.2.1)
     bson_ext (1.5.1)
     coderay (1.1.1)
@@ -21,7 +20,6 @@ GEM
       bson (>= 4.2.1, < 5.0.0)
     multi_json (1.12.1)
     multi_xml (0.6.0)
-    multihashes (0.1.3)
     multipart-post (2.0.0)
     mustermann (1.0.0)
     nokogiri (1.7.2)
@@ -59,13 +57,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  base58
   bson_ext
   digest
   gon-sinatra
   httparty
   mongo
-  multihashes
   nokogiri
   octokit
   pry

@@ -6,7 +6,11 @@ services:
     volumes:
       - .:/dll-review-registry
     ports:
-      - "3000:3000"
+      - "4567:4567"
+      - "4001:4001"
+      - "8080:8080"
+    env_file:
+      - "github-variables.env"
     environment:
       - RACK_ENV=docker
     links:

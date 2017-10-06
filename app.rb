@@ -4,10 +4,8 @@ require 'securerandom'
 require 'mongo'
 require 'json/ext' # required for .to_json
 require "digest"
-require 'multihashes'
 require 'uri'
 require 'httparty'
-require 'base58'
 require 'gon-sinatra'
 require 'octokit'
 
@@ -200,8 +198,7 @@ post '/reviews/create' do
           "review-summary": review_summary,
           "sha-256": shasum,
           "ipfs-hash": ipfs_hash,
-          "git-blob-hash": nil,
-          "url": review_text_url
+          "submitted-url": review_text_url
       }
       #filename = "public/" + id + '.json'
       #final_content = JSON.pretty_generate(review_content)
@@ -232,7 +229,7 @@ end
 get '/reviews/:id.html' do |id|
   db = settings.mongo_db
   @document = db.find( { "id": "#{id}" } ).to_a.first
-  @id = @document["@id"]
+  @id = @document["id"]
   erb :show
 end
 
@@ -241,25 +238,34 @@ get '/hash/:hash.json' do |id|
   content_type :json
   db = settings.mongo_db
   if id.start_with? "Qm"
-    documents = db.find( { "review-metadata.ipfs-hash": "#{id}"}).to_a
+    documents = db.find( { "ipfs-hash": "#{id}"}).to_a
   else
-    documents = db.find( { "review-metadata.sha-256": "#{id}"}).to_a
+    documents = db.find( { "sha-256": "#{id}"}).to_a
   end
   (documents || {}).to_json
 end
 get '/hash/:hash.html' do |id|
   db = settings.mongo_db
   if id.start_with? "Qm"
-    @documents = db.find( { "review-metadata.ipfs-hash": "#{id}"}).to_a
+    @documents = db.find( { "ipfs-hash": "#{id}"}).to_a
   else
-    @documents = db.find( { "review-metadata.sha-256": "#{id}"}).to_a
+    @documents = db.find( { "sha-256": "#{id}"}).to_a
   end
   erb :show_array
 end
 # api/v1 routes
-get '/api/v1/reviews/:hash' do |id|
+get '/api/v1/reviews/?:hash?' do |id|
   headers( "Access-Control-Allow-Origin" => "*")
   content_type :json
+
+  if params[:url] && id.nil?
+    url = params[:url]
+    response = HTTParty.get(url)
+    shasum = Digest::SHA2.hexdigest(response.body)
+    id = shasum
+  end
+
+
   db = settings.mongo_db
   if id.start_with? "Qm"
     documents = db.find( { "ipfs-hash": "#{id}"}).to_a
@@ -279,8 +285,7 @@ get '/api/v1/reviews/:hash' do |id|
       "review-summary": doc["review-summary"],
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
-      "git-blob-hash": doc["git-blob-hash"],
-      "url": doc["url"]
+      "submitted-url": doc["submitted-url"]
     }
 
   }.to_json
@@ -303,17 +308,9 @@ get '/api/v1/review/:id' do |id|
       "review-summary": doc["review-summary"],
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
-      "git-blob-hash": doc["git-blob-hash"],
-      "url": doc["url"]
+      "submitted-url": doc["submitted-url"]
   }.to_json
 end
-get '/api/v1/text' do
-  url = params[:url]
-  response = HTTParty.get(url)
-  shasum = Digest::SHA2.hexdigest(response.body)
-  redirect "/api/v1/reviews/#{shasum}"
-end
-
 helpers do
   # a helper method to turn a string ID
   # representation into a BSON::ObjectId

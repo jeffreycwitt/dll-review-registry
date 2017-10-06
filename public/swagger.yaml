@@ -30,8 +30,13 @@ paths:
         - in: path
           type: string
           name: hash
-          description: hash of reviewed file
-          required: true
+          description: hash of reviewed file. If the url parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
+          required: false
+        - in: query
+          type: string
+          name: url
+          description: Any accessible url containing the raw contents of the reviewed file. If this hash parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
+          required: false
       responses:
         '200':
           description: successful operation
@@ -90,10 +95,7 @@ definitions:
       ipfs-hash:
         type: string
         description: ''
-      git-blob-hash:
-        type: string
-        description: ''
-      url:
+      submitted-url:
         type: string
         description: ''
   ApiResponse:

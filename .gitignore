@@ -1,3 +1,4 @@
 data/
 tmp/
 convert-yaml.sh
+github-variables.env

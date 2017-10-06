@@ -1,4 +1,9 @@
 <div class="container">
-<h1>Review Created</h1>
-<a href="/reviews/<%= @id %>.html">View review here</a>
+<h1><%= @message %></h1>
+<% if @success %>
+  <a href="/reviews/<%= @id %>.html">View review here</a>
+<% else %>
+  <a href="/reviews/create">Try again</a>
+<% end %>
+
 </div>

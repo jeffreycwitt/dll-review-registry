@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  description: dll review registry api
+  description: DLL Review Registry Api
   version: 1.0.0
   title: DLL Review Registry
   termsOfService: 'http://swagger.io/terms/'
@@ -12,20 +12,19 @@ info:
 host: 'localhost:4567'
 basePath: /api/v1
 tags:
-  - name: hashes
+  - name: Reviews
     description: Find reviews about a text
 schemes:
   - http
   - https
 paths:
-  '/text/{hash}':
+  '/reviews/{hash}':
     get:
       tags:
-        - hashes
-      summary: Get list of reviews by hash
+        - Reviews
+      summary: Get a list of reviews corresponding to a given text
       description: ''
       produces:
-        - text/html
         - application/json
       parameters:
         - in: path
@@ -43,11 +42,10 @@ paths:
   '/review/{id}':
     get:
       tags:
-        - reviews
-      summary: Get list of reviews by hash
+        - Reviews
+      summary: Get a review corresponding to a review id
       description: ''
       produces:
-        - text/html
         - application/json
       parameters:
         - in: path

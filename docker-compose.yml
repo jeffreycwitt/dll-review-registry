@@ -13,6 +13,8 @@ services:
       - "github-variables.env"
     environment:
       - RACK_ENV=docker
+    volumes:
+      - ./data/ipfs:/data/ipfs
     links:
       - mongodb
     depends_on:

@@ -126,7 +126,7 @@ get '/rubric/:society' do |society|
 end
 get '/reviews' do
   @reviews = []
-
+  @authorized = authorized?
   db = settings.mongo_db
   db.find().map {|object|
     @reviews << object
@@ -167,11 +167,11 @@ post '/reviews/create' do
       review_summary = params[:review_summary]
       review_badge_number = params[:review_badge_number]
       if review_badge_number == "1"
-        review_badge = "http://dll-review-registry.herokuapp.com/maa-badge-working.svg"
-        badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#green"
+        review_badge = "#{request.base_url}/maa-badge-working.svg"
+        badge_rubric = "#{request.base_url}/rubric/maa#green"
       elsif review_badge_number == "2"
-        review_badge = "http://dll-review-registry.herokuapp.com/maa-badge.svg"
-        badge_rubric = "http://dll-review-registry.herokuapp.com/rubric/maa#gold"
+        review_badge = "#{request.base_url}/maa-badge.svg"
+        badge_rubric = "#{request.base_url}/rubric/maa#gold"
       end
 
       response = HTTParty.get(review_text_url)
@@ -231,6 +231,16 @@ get '/reviews/:id.html' do |id|
   @document = db.find( { "id": "#{id}" } ).to_a.first
   @id = @document["id"]
   erb :show
+end
+
+get '/reviews/:id/delete' do |id|
+  if authorized?
+    db = settings.mongo_db
+    db.delete_one( { "id": "#{id}" } )
+    redirect "/reviews"
+  else
+    "not authorized"
+  end
 end
 
 get '/hash/:hash.json' do |id|

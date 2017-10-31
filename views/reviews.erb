@@ -10,6 +10,9 @@
 
       <td><%= review["date"] %></td>
       <td><%= review["review-society"] %></td>
+      <% if @authorized %>
+        <td><a href="/reviews/<%= review["id"] %>/delete">Delete</a></td>
+      <% end %>
     </tr>
     <% end %>
   </table>

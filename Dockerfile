@@ -5,7 +5,7 @@ USER root
 ENV IPFS_DIST_URL=https://dist.ipfs.io/go-ipfs/v0.4.10/go-ipfs_v0.4.10_linux-amd64.tar.gz \
     IPFS_PATH=/data/ipfs
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nano
 
 RUN mkdir -p ~/tmp ;\
 wget -qO- ${IPFS_DIST_URL} | tar xz -C ~/tmp/ ;\
@@ -14,8 +14,9 @@ mv ~/tmp/go-ipfs/ipfs /usr/local/bin/ ; rm -rf ~/tmp/*
 RUN ipfs --version
 RUN mkdir -p /data/ipfs
 RUN ipfs init
-EXPOSE 4001
 EXPOSE 8080
+EXPOSE 4001
+ADD ipfs-config.json /data/ipfs/config
 
 RUN mkdir /dll-review-registry
 WORKDIR /dll-review-registry

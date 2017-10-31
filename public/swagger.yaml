@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-host: 'localhost:4567'
+host: 'dll-review-registry.scta.info'
 basePath: /api/v1
 tags:
   - name: Reviews

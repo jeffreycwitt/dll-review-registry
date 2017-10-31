@@ -62,7 +62,7 @@ def authorized?
   rescue
     username = ""
   end
-  username == "jeffreycwitt"
+  username == "jeffreycwitt" || username == "sjhuskey"
 end
 
 

@@ -146,23 +146,28 @@ get '/document/:id/?' do
 end
 
 get '/reviews/create' do
-  if authorized?
+  if authenticated?
+    @authorized = authorized?
+    client = Octokit::Client.new :access_token => session[:access_token]
+    data = client.user
+    @username = data.email ? data.email : data.login
     erb :create
   else
-    "not authorized"
+    "You must be logged in to leave a review. <a href='/login'>Click here to log in with github</a>"
   end
 end
 
 post '/reviews/create' do
-  if authorized?
+  if authenticated?
     if params[:review_text_url].include? "master"
-      @message = "sorry, it looks like you've used a github branch url, please is a url with the file blob hash"
+      @message = "sorry, it looks like you've used a github branch url, please is a url with the file blob or commit hash"
       @success = false
       erb :create_completed
     else
       id = SecureRandom.uuid
       date = Time.new
       review_text_url = params[:review_text_url]
+      submitted_by = params[:submitted_by]
       review_society = params[:review_society]
       review_summary = params[:review_summary]
       review_badge_number = params[:review_badge_number]
@@ -194,11 +199,11 @@ post '/reviews/create' do
           "date": date,
           "badge-url": review_badge,
           "badge-rubric": badge_rubric,
-          "review-report": nil,
           "review-summary": review_summary,
           "sha-256": shasum,
           "ipfs-hash": ipfs_hash,
-          "submitted-url": review_text_url
+          "submitted-url": review_text_url,
+          "submitted-by": submitted_by
       }
       #filename = "public/" + id + '.json'
       #final_content = JSON.pretty_generate(review_content)
@@ -213,7 +218,7 @@ post '/reviews/create' do
       erb :create_completed
     end
   else
-    "not authorized"
+    "You must be logged in to leave a review. <a href='/login'>Click here to log in with github</a>"
   end
 
 end
@@ -275,12 +280,19 @@ get '/api/v1/reviews/?:hash?' do |id|
     id = shasum
   end
 
-
   db = settings.mongo_db
   if id.start_with? "Qm"
-    documents = db.find( { "ipfs-hash": "#{id}"}).to_a
+    if params[:society]
+      documents = db.find( { "ipfs-hash": "#{id}", "review-society": "#{params[:society]}"}).to_a
+    else
+      documents = db.find( { "ipfs-hash": "#{id}"}).to_a
+    end
   else
-    documents = db.find( { "sha-256": "#{id}"}).to_a
+    if params[:society]
+      documents = db.find( { "sha-256": "#{id}", "review-society": "#{params[:society]}"}).to_a
+    else
+      documents = db.find( { "sha-256": "#{id}"}).to_a
+    end
   end
   (documents || {})
 
@@ -291,11 +303,11 @@ get '/api/v1/reviews/?:hash?' do |id|
       "date": doc["date"],
       "badge-url": doc["badge-url"],
       "badge-rubric": doc["badge-rubric"],
-      "review-report": doc["review-report"],
       "review-summary": doc["review-summary"],
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
-      "submitted-url": doc["submitted-url"]
+      "submitted-url": doc["submitted-url"],
+      "submitted-by": doc["submitted-by"]
     }
 
   }.to_json
@@ -314,11 +326,11 @@ get '/api/v1/review/:id' do |id|
       "date": doc["date"],
       "badge-url": doc["badge-url"],
       "badge-rubric": doc["badge-rubric"],
-      "review-report": doc["review-report"],
       "review-summary": doc["review-summary"],
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
-      "submitted-url": doc["submitted-url"]
+      "submitted-url": doc["submitted-url"],
+      "submitted-by": doc["submitted-by"]
   }.to_json
 end
 helpers do

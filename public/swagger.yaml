@@ -37,6 +37,11 @@ paths:
           name: url
           description: Any accessible url containing the raw contents of the reviewed file. If this hash parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
           required: false
+        - in: query
+          type: string
+          name: society
+          description: Filter any review list for a given text, by the id of a review society (e.g. MAA, SCS, RSA)
+          required: false
       responses:
         '200':
           description: successful operation
@@ -82,9 +87,6 @@ definitions:
       badge-rubric:
         type: integer
         format: int32
-        description: Order Status
-      review-report:
-        type: string
         description: ''
       review-summary:
         type: string
@@ -96,6 +98,9 @@ definitions:
         type: string
         description: ''
       submitted-url:
+        type: string
+        description: ''
+      submitted-by:
         type: string
         description: ''
   ApiResponse:

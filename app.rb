@@ -333,6 +333,32 @@ get '/api/v1/review/:id' do |id|
       "submitted-by": doc["submitted-by"]
   }.to_json
 end
+get '/api/v1/hash' do
+  headers( "Access-Control-Allow-Origin" => "*")
+  content_type :json
+  url = params[:url]
+  whitelist = [
+    "http://scta.lombardpress.dev:3000",
+    "http://scta.lombardpress.org",
+    "https://scta.lombardpress.org",
+    "https://scta-staging.lombardpress.org",
+    ]
+  if whitelist.include? request.env["HTTP_ORIGIN"]
+    response = HTTParty.get(url)
+    shasum = Digest::SHA2.hexdigest(response.body)
+    filename = url.split('/').last
+    File.open("tmp/#{filename}", 'w') { |file|
+      file.write(response.body)
+    }
+    puts "IPFS test"
+    ipfs_report = `ipfs add "tmp/#{filename}"`
+    puts ipfs_report
+    ipfs_hash = ipfs_report.split(" ")[1]
+    return {"ipfs-hash": ipfs_hash}.to_json
+  else
+    return "Not allowed. Request must be white listed"
+  end
+end
 helpers do
   # a helper method to turn a string ID
   # representation into a BSON::ObjectId

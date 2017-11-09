@@ -341,6 +341,7 @@ get '/api/v1/hash' do
     "http://scta.lombardpress.dev:3000",
     "http://scta.lombardpress.org",
     "https://scta.lombardpress.org",
+    "http://scta-staging.lombardpress.org",
     "https://scta-staging.lombardpress.org",
     ]
   if whitelist.include? request.env["HTTP_ORIGIN"]

@@ -9,6 +9,8 @@ require 'httparty'
 require 'gon-sinatra'
 require 'octokit'
 
+require_relative 'lib/badge'
+
 CLIENT_ID = ENV['CLIENT_ID']
 CLIENT_SECRET = ENV['CLIENT_SECRET']
 
@@ -192,6 +194,15 @@ post '/reviews/create' do
       puts ipfs_report
       ipfs_hash = ipfs_report.split(" ")[1]
 
+      certificate = createBadge(ipfs_hash)
+      File.open("tmp/#{filename}", 'w') { |file|
+        file.write(certificate)
+      }
+      puts "IPFS test"
+      cert_ipfs_report = `ipfs add "tmp/#{filename}"`
+      puts cert_ipfs_report
+      cert_ipfs_hash = cert_ipfs_report.split(" ")[1]
+
 
       review_content =  {
           "id": id,
@@ -203,7 +214,8 @@ post '/reviews/create' do
           "sha-256": shasum,
           "ipfs-hash": ipfs_hash,
           "submitted-url": review_text_url,
-          "submitted-by": submitted_by
+          "submitted-by": submitted_by,
+          "cert-ipfs-hash": cert_ipfs_hash
       }
       #filename = "public/" + id + '.json'
       #final_content = JSON.pretty_generate(review_content)

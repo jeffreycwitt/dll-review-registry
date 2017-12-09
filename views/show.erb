@@ -22,8 +22,12 @@
       <td><%= @document["sha-256"] %></td>
     </tr>
     <tr>
-      <td>IPFS Hash </td>
+      <td>Document IPFS Hash </td>
       <td><a href="http://gateway.scta.info/ipfs/<%= @document['ipfs-hash'] %>"><%= @document["ipfs-hash"] %></a></td>
+    </tr>
+    <tr>
+      <td>Certificate IPFS Hash </td>
+      <td><a href="http://localhost:8080/ipfs/<%= @document['cert-ipfs-hash'] %>"><%= @document["cert-ipfs-hash"] %></a></td>
     </tr>
     <tr>
       <td>Submitted URL</td>

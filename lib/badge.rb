@@ -52,6 +52,7 @@ def createBadge(ipfsurl)
     "type": "BadgeClass",
     "name": "MAA Gold"
   }
-}.to_json
-return certificate
+}
+return JSON.pretty_generate(certificate)
+
 end

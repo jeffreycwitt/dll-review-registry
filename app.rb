@@ -3,11 +3,11 @@ require 'sinatra'
 require 'securerandom'
 require 'mongo'
 require 'json/ext' # required for .to_json
-require "digest"
 require 'uri'
 require 'httparty'
 require 'gon-sinatra'
 require 'octokit'
+require 'openssl' # required for use of digest module
 
 require_relative 'lib/badge'
 
@@ -182,7 +182,7 @@ post '/reviews/create' do
       end
 
       response = HTTParty.get(review_text_url)
-      shasum = Digest::SHA2.hexdigest(response.body)
+      shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
 
 
       filename = review_text_url.split('/').last
@@ -288,7 +288,7 @@ get '/api/v1/reviews/?:hash?' do |id|
   if params[:url] && id.nil?
     url = params[:url]
     response = HTTParty.get(url)
-    shasum = Digest::SHA2.hexdigest(response.body)
+    shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
     id = shasum
   end
 
@@ -358,7 +358,7 @@ get '/api/v1/hash' do
     ]
   if whitelist.include? request.env["HTTP_ORIGIN"]
     response = HTTParty.get(url)
-    shasum = Digest::SHA2.hexdigest(response.body)
+    shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
     filename = url.split('/').last
     File.open("tmp/#{filename}", 'w') { |file|
       file.write(response.body)

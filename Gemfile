@@ -8,7 +8,6 @@ gem 'httparty'
 gem 'puma'
 gem 'mongo'
 gem 'bson_ext'
-gem "digest"
 gem 'gon-sinatra'
 gem 'octokit'
 

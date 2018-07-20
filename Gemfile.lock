@@ -7,7 +7,6 @@ GEM
     bson (4.2.1)
     bson_ext (1.5.1)
     coderay (1.1.1)
-    digest (0.0.1)
     faraday (0.13.0)
       multipart-post (>= 1.2, < 3)
     gon-sinatra (0.1.2)
@@ -58,7 +57,6 @@ PLATFORMS
 
 DEPENDENCIES
   bson_ext
-  digest
   gon-sinatra
   httparty
   mongo

@@ -8,6 +8,9 @@ require 'httparty'
 require 'gon-sinatra'
 require 'octokit'
 require 'openssl' # required for use of digest module
+require 'open-uri'
+
+
 
 require_relative 'lib/badge'
 
@@ -146,7 +149,30 @@ get '/document/:id/?' do
   content_type :json
   document_by_id(params[:id])
 end
+# form for verifying certificate against signed signature and public key
+get '/verify' do
+  erb :verify
+end
+# verify certificate against signed signature and public key
+get '/verify_result' do
+  signature_url = params[:signature_url]
+  certificate_url = params[:certificate_url]
+  open("tmp/signature", "wb") do |file|
+    open(signature_url) do |uri|
+     file.write(uri.read)
+   end
+  end
+  open("tmp/certificate", "wb") do |file|
+    open(certificate_url) do |uri|
+     file.write(uri.read)
+   end
+  end
 
+  @report = `gpg --verify tmp/signature tmp/certificate 2>&1`
+  puts @report
+  erb :verify_result
+
+end
 get '/reviews/create' do
   if authenticated?
     @authorized = authorized?
@@ -203,6 +229,14 @@ post '/reviews/create' do
       puts cert_ipfs_report
       cert_ipfs_hash = cert_ipfs_report.split(" ")[1]
 
+      puts "creates detached signature for file"
+      puts "gpg --armor -u 'Medieval Academy of America' -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/#{filename}"
+      `gpg --no-tty --armor -u "Medieval Academy of America" -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/#{filename}`
+      detach_sig_ipfs_report = `ipfs add "tmp/#{cert_ipfs_hash}-sig.asc"`
+      puts detach_sig_ipfs_report
+      detach_sig_hash = detach_sig_ipfs_report.split(" ")[1]
+      puts "test"
+      puts detach_sig_hash
 
       review_content =  {
           "id": id,
@@ -215,7 +249,8 @@ post '/reviews/create' do
           "ipfs-hash": ipfs_hash,
           "submitted-url": review_text_url,
           "submitted-by": submitted_by,
-          "cert-ipfs-hash": cert_ipfs_hash
+          "cert-ipfs-hash": cert_ipfs_hash,
+          "detach-sig-hash": detach_sig_hash
       }
       #filename = "public/" + id + '.json'
       #final_content = JSON.pretty_generate(review_content)
@@ -319,7 +354,8 @@ get '/api/v1/reviews/?:hash?' do |id|
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
       "submitted-url": doc["submitted-url"],
-      "submitted-by": doc["submitted-by"]
+      "submitted-by": doc["submitted-by"],
+      "detach-sig-hash": doc["detach_sig_hash"]
     }
 
   }.to_json
@@ -342,7 +378,8 @@ get '/api/v1/review/:id' do |id|
       "sha-256": doc["sha-256"],
       "ipfs-hash": doc["ipfs-hash"],
       "submitted-url": doc["submitted-url"],
-      "submitted-by": doc["submitted-by"]
+      "submitted-by": doc["submitted-by"],
+      "detach-sig-hash": doc["detach-sig-hash"]
   }.to_json
 end
 get '/api/v1/hash' do

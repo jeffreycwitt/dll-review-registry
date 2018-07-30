@@ -5,7 +5,8 @@ USER root
 ENV IPFS_DIST_URL=https://dist.ipfs.io/go-ipfs/v0.4.10/go-ipfs_v0.4.10_linux-amd64.tar.gz \
     IPFS_PATH=/data/ipfs
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nano
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nano gnupg
+
 
 RUN mkdir -p ~/tmp ;\
 wget -qO- ${IPFS_DIST_URL} | tar xz -C ~/tmp/ ;\
@@ -30,6 +31,9 @@ RUN bundle install
 
 # Now add the rest of the files
 ADD . /dll-review-registry
+
+# Import private
+RUN gpg --import private-key-MAA.asc
 
 #Set Environemnet Variable
 ENV RACK_ENV=docker

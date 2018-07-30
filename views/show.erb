@@ -30,12 +30,20 @@
       <td><a href="http://gateway.scta.info/ipfs/<%= @document['cert-ipfs-hash'] %>"><%= @document["cert-ipfs-hash"] %></a></td>
     </tr>
     <tr>
+      <td>Certificate Signature </td>
+      <td><a href="http://gateway.scta.info/ipfs/<%= @document['detach-sig-hash'] %>"><%= @document["detach-sig-hash"] %></a></td>
+    </tr>
+    <tr>
       <td>Submitted URL</td>
       <td><a href="<%= @document['submitted-url'] %>"><%= @document["submitted-url"] %></a></td>
     </tr>
     <tr>
       <td>Submitted by</td>
       <td><%= @document["submitted-by"] %></td>
+    </tr>
+    <tr>
+      <td>Perform Verification?</td>
+      <td><a href="/verify_result?certificate_url=http://gateway.scta.info/ipfs/<%= @document['cert-ipfs-hash'] %>&signature_url=http://gateway.scta.info/ipfs/<%= @document['detach-sig-hash'] %>">Check</td>
     </tr>
 
 

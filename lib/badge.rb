@@ -1,4 +1,4 @@
-def createBadge(ipfsurl)
+def createBadge(ipfshashes)
   date = Time.new
   ipfsurl = ipfsurl
   certuid = SecureRandom.uuid
@@ -6,14 +6,22 @@ def createBadge(ipfsurl)
   criteria = "Meets the standards of a critical edition; judged by the MAA as equal in quality to the kinds of editions that appear in the MAA printed editions series or scholarly articles that appear the MAA journal 'Speculum'."
   badgeImage = "http://dll-review-registry.scta.info/maa-badge-working.svg"
   issuerImage = "https://pbs.twimg.com/profile_images/1534408703/maa_symbol_small_400x400.png"
+
+  recipients = []
+  ipfshashes.each do |hash|
+    recipient = {
+      "type": "hash",
+      "identity": hash,
+      "url": "http://gateway.scta.info/ipfs/#{hash}"
+    }
+    recipients << recipient
+  end
+
   certificate = {
     "@context": "https://w3id.org/openbadges/v2",
     "id": "urn:uuid:#{certuid}",
     "type": "Assertion",
-    "recipient": {
-      "type": "url",
-      "identity": "http://gateway.scta.info/ipfs/#{ipfsurl}"
-    },
+    "recipients": recipients,
     "issuedOn": date,
     "verification": {
       "type": "signedBadge",

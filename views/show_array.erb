@@ -20,11 +20,51 @@
     </tr>
     <tr>
       <td>Shasum</td>
-      <td><%= document["sha-256"] %></td>
+      <td>
+        <% document["sha-256"].each do |shasum| %>
+          <%= shasum %>
+        <% end %>
+      </td>
     </tr>
     <tr>
-      <td>IPFS Hash </td>
-      <td><a href="https:gateway.ipfs.io/ipfs/<%= document['ipfs-hash'] %>"><%= document["ipfs-hash"] %></a></td>
+      <td>Document IPFS Hash </td>
+      <td>
+        <% document["ipfs-hash"].each do |hash| %>
+          <a href="<%= @gateway %>/ipfs/<%= hash %>"><%= hash %></a>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <td>Certificate IPFS Hash </td>
+      <td><a href="<%= @gateway %>/ipfs/<%= document['cert-ipfs-hash'] %>"><%= document["cert-ipfs-hash"] %></a></td>
+    </tr>
+    <tr>
+      <td>Clear Signed Certificate </td>
+      <td><a href="<%= @gateway %>/ipfs/<%= document['clearsigned-hash'] %>"><%= document["clearsigned-hash"] %></a></td>
+    </tr>
+    <tr>
+      <td>Certificate Signature </td>
+      <td><a href="<%= @gateway %>/ipfs/<%= document['detach-sig-hash'] %>"><%= document["detach-sig-hash"] %></a></td>
+    </tr>
+    <tr>
+      <td>Submitted URL</td>
+      <td>
+        <% document["submitted-url"].each do |url| %>
+          <a href="<%= url %>"><%= url %></a>
+        <% end %>
+
+      </td>
+    </tr>
+    <tr>
+      <td>Submitted by</td>
+      <td><%= document["submitted-by"] %></td>
+    </tr>
+    <tr>
+      <td>Perform Verification?</td>
+      <td>
+        <a href="/verify_result?certificate_url=<%= @gateway %>/ipfs/<%= document['cert-ipfs-hash'] %>&signature_url=<%= @gateway %>/ipfs/<%= document['detach-sig-hash'] %>">Detatched Sig Check</a>
+        <a href="/verify_result?clearsigned_url=<%= @gateway %>/ipfs/<%= document['clearsigned-hash'] %>">Clear Signed Sig Check</a>
+      </td>
     </tr>
 
 

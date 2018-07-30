@@ -1,5 +1,5 @@
 <div class="container">
-  <h1>Verify</h1>
+  <h1>Verify With Signature and Certificate</h1>
   <form class="form-horizontal " action="/verify_result" method="get">
     <div class="form-group">
       <label class="control-label" style="width:100%;">Certificate URL</label>
@@ -10,11 +10,41 @@
       <textarea class="form-control" name="signature_url"></textarea>
     </div>
     <div class="form-group">
-      <label class="control-label" style="width:100%;">Public Key Url</label>
-      <textarea class="form-control" name="public_key_url"></textarea>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+</div>
+<div class="container">
+  <h1>Verify With Clear Signed Certificate</h1>
+  <form class="form-horizontal " action="/verify_result" method="get">
+    <div class="form-group">
+      <label class="control-label" style="width:100%;">Clear Signed Certificate URL</label>
+      <input class="form-control" type="text" name="clearsigned_url"></input>
     </div>
     <div class="form-group">
       <button type="submit" class="btn btn-primary">Submit</button>
     </div>
   </form>
+</div>
+<div class="container" id="verify-for-self">
+  <h1>Verify For Your Self</h1>
+  <p>You can Self verify a signed document in several ways.</p>
+  <p>To verify a document with detached signature follow these steps:
+    <ul>
+      <li>Download the public key of the signing institution (e.g. <a href="/maa-pub.asc">MAA</a>)</li>
+      <li>Import the public key of the signing institution to your key (gpg --import [path/to/downloaded/key]</li>
+      <li>Download the detached signature for the certificate in question</li>
+      <li>Download the certificate in question</li>
+      <li>Perform verification (gpg --verify [path/to/signature] [path/to/certificate])</li>
+    </ul>
+  </p>
+  <p>
+    To verify a document with a clear signed signature follow these steps:
+    <ul>
+      <li>Download the public key of the signing institution e.g. <a href="/maa-pub.asc">MAA</a>)</li>
+      <li>Import the public key of the signing institution to your key (gpg --import [path/to/downloaded/key]</li>
+      <li>Download the clear signed certificate</li>
+      <li>Perform verification (gpg --verify [path/to/clear/signed/certificate]</li>
+    </ul>
+  </p>
 </div>

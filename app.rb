@@ -17,6 +17,8 @@ require_relative 'lib/badge'
 CLIENT_ID = ENV['CLIENT_ID']
 CLIENT_SECRET = ENV['CLIENT_SECRET']
 
+
+
 use Rack::Session::Pool
 Sinatra::register Gon::Sinatra
 
@@ -24,14 +26,17 @@ configure do
   if settings.development?
     dbname = "test"
     db = Mongo::Client.new(['127.0.0.1:27017'], :database => dbname)
+    gateway = "http://localhost:8080"
   elsif settings.environment == :docker
     dbname = "test"
     db = Mongo::Client.new(['mongodb:27017'], :database => dbname)
+    gateway = ENV['GATEWAY']
   else
     dbname = ENV['MONGODB_URI'].split("/").last
     db = Mongo::Client.new(ENV['MONGODB_URI'], :database => dbname)
   end
   set :mongo_db, db[dbname.to_sym]
+  set :gateway, gateway
   set :server, :puma
   set :bind, "0.0.0.0"
   set :protection, except: [:frame_options, :json_csrf]
@@ -155,6 +160,15 @@ get '/verify' do
 end
 # verify certificate against signed signature and public key
 get '/verify_result' do
+  if params[:clearsigned_url]
+    open("tmp/clearsigned_certificate", "wb") do |file|
+      open(params[:clearsigned_url]) do |uri|
+       file.write(uri.read)
+     end
+    end
+    @report = `gpg --verify tmp/clearsigned_certificate 2>&1`
+    puts @report
+  else
   signature_url = params[:signature_url]
   certificate_url = params[:certificate_url]
   open("tmp/signature", "wb") do |file|
@@ -170,6 +184,7 @@ get '/verify_result' do
 
   @report = `gpg --verify tmp/signature tmp/certificate 2>&1`
   puts @report
+  end
   erb :verify_result
 
 end
@@ -207,36 +222,47 @@ post '/reviews/create' do
         badge_rubric = "#{request.base_url}/rubric/maa#gold"
       end
 
-      response = HTTParty.get(review_text_url)
-      shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
+      urls = review_text_url.split(" ")
 
+      ipfs_hashes = []
+      shasums = []
+      urls.each do |url|
+        response = HTTParty.get(url)
+        shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
+        shasums << shasum
+        filename = url.split('/').last
+        File.open("tmp/#{filename}", 'w') { |file|
+          file.write(response.body)
+        }
+        puts "IPFS test"
+        ipfs_report = `ipfs add "tmp/#{filename}"`
+        puts ipfs_report
+        ipfs_hash = ipfs_report.split(" ")[1]
+        ipfs_hashes << ipfs_hash
+      end
 
-      filename = review_text_url.split('/').last
-      File.open("tmp/#{filename}", 'w') { |file|
-        file.write(response.body)
-      }
-      puts "IPFS test"
-      ipfs_report = `ipfs add "tmp/#{filename}"`
-      puts ipfs_report
-      ipfs_hash = ipfs_report.split(" ")[1]
-
-      certificate = createBadge(ipfs_hash)
-      File.open("tmp/#{filename}", 'w') { |file|
+      certificate = createBadge(ipfs_hashes)
+      File.open("tmp/newcert", 'w') { |file|
         file.write(certificate)
       }
       puts "IPFS test"
-      cert_ipfs_report = `ipfs add "tmp/#{filename}"`
+      cert_ipfs_report = `ipfs add "tmp/newcert"`
       puts cert_ipfs_report
       cert_ipfs_hash = cert_ipfs_report.split(" ")[1]
 
       puts "creates detached signature for file"
-      puts "gpg --armor -u 'Medieval Academy of America' -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/#{filename}"
-      `gpg --no-tty --armor -u "Medieval Academy of America" -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/#{filename}`
+      puts "gpg --armor -u 'Medieval Academy of America' -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/newcert"
+      `gpg --no-tty --armor -u "Medieval Academy of America" -o tmp/#{cert_ipfs_hash}-sig.asc --passphrase #{ENV['PASSPHRASE']} --detach-sig tmp/newcert`
+      `gpg --no-tty -u "Medieval Academy of America" -o tmp/#{cert_ipfs_hash}-clearsigned.asc --passphrase #{ENV['PASSPHRASE']} --clearsign tmp/newcert`
       detach_sig_ipfs_report = `ipfs add "tmp/#{cert_ipfs_hash}-sig.asc"`
       puts detach_sig_ipfs_report
       detach_sig_hash = detach_sig_ipfs_report.split(" ")[1]
-      puts "test"
       puts detach_sig_hash
+
+      clearsigned_cert_report = `ipfs add "tmp/#{cert_ipfs_hash}-clearsigned.asc"`
+      puts clearsigned_cert_report
+      clearsigned_hash = clearsigned_cert_report.split(" ")[1]
+      puts clearsigned_hash
 
       review_content =  {
           "id": id,
@@ -245,12 +271,13 @@ post '/reviews/create' do
           "badge-url": review_badge,
           "badge-rubric": badge_rubric,
           "review-summary": review_summary,
-          "sha-256": shasum,
-          "ipfs-hash": ipfs_hash,
-          "submitted-url": review_text_url,
+          "sha-256": shasums,
+          "ipfs-hash": ipfs_hashes,
+          "submitted-url": urls,
           "submitted-by": submitted_by,
           "cert-ipfs-hash": cert_ipfs_hash,
-          "detach-sig-hash": detach_sig_hash
+          "detach-sig-hash": detach_sig_hash,
+          "clearsigned-hash": clearsigned_hash,
       }
       #filename = "public/" + id + '.json'
       #final_content = JSON.pretty_generate(review_content)
@@ -280,6 +307,7 @@ get '/reviews/:id.json' do |id|
 end
 get '/reviews/:id.html' do |id|
   db = settings.mongo_db
+  @gateway = settings.gateway
   @document = db.find( { "id": "#{id}" } ).to_a.first
   @id = @document["id"]
   erb :show
@@ -308,6 +336,7 @@ get '/hash/:hash.json' do |id|
 end
 get '/hash/:hash.html' do |id|
   db = settings.mongo_db
+  @gateway = settings.gateway
   if id.start_with? "Qm"
     @documents = db.find( { "ipfs-hash": "#{id}"}).to_a
   else

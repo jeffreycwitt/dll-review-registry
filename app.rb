@@ -160,17 +160,38 @@ get '/verify' do
 end
 # verify certificate against signed signature and public key
 get '/verify_result' do
+
   if params[:clearsigned_url]
+    clearsigned_url = if params[:clearsigned_url].include? "https://gateway.scta.info" then
+      params[:clearsigned_url].gsub("https://gateway.scta.info", "http://localhost:8080")
+    elsif params[:clearsigned_url].include? "http://gateway.scta.info"
+      params[:clearsigned_url].gsub("http://gateway.scta.info", "http://localhost:8080")
+    else
+      params[:clearsigned_url]
+    end
     open("tmp/clearsigned_certificate", "wb") do |file|
-      open(params[:clearsigned_url]) do |uri|
+      open(clearsigned_url) do |uri|
        file.write(uri.read)
      end
     end
     @report = `gpg --verify tmp/clearsigned_certificate 2>&1`
     puts @report
   else
-  signature_url = params[:signature_url]
-  certificate_url = params[:certificate_url]
+  signature_url = if params[:signature_url].include? "https://gateway.scta.info" then
+    params[:signature_url].gsub("https://gateway.scta.info", "http://localhost:8080")
+  elsif params[:signature_url].include? "http://gateway.scta.info"
+    params[:signature_url].gsub("http://gateway.scta.info", "http://localhost:8080")
+  else
+    params[:signature_url]
+  end
+  certificate_url = if params[:certificate_url].include? "https://gateway.scta.info" then
+    params[:certificate_url].gsub("https://gateway.scta.info", "http://localhost:8080")
+  elsif params[:certificate_url].include? "http://gateway.scta.info"
+    params[:certificate_url].gsub("http://gateway.scta.info", "http://localhost:8080")
+  else
+    params[:certificate_url]
+  end
+
   open("tmp/signature", "wb") do |file|
     open(signature_url) do |uri|
      file.write(uri.read)

@@ -1,6 +1,6 @@
 <% @documents.each do |document| %>
 <div class="container">
-  <h1>Review <a href="/<%= document['@id']%>.html"><%= document["@id"] %></a></h1>
+  <h1>Review <a href="/reviews/<%= document['id']%>.html"><%= document["id"] %></a></h1>
   <table class="table">
     <tr>
       <td>Review Society</td>

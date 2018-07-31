@@ -31,12 +31,38 @@ paths:
           type: string
           name: hash
           description: hash of reviewed file. If the url parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
-          required: false
+          required: true
         - in: query
           type: string
           name: url
           description: Any accessible url containing the raw contents of the reviewed file. If this hash parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
           required: false
+        - in: query
+          type: string
+          name: society
+          description: Filter any review list for a given text, by the id of a review society (e.g. MAA, SCS, RSA)
+          required: false
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Review'
+  '/reviews/':
+    get:
+      tags:
+        - Reviews
+      summary: Get a list of reviews corresponding to a given text
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          type: string
+          name: url
+          description: Any accessible url containing the raw contents of the reviewed file. If this hash parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.
+          required: true
         - in: query
           type: string
           name: society
@@ -68,6 +94,25 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/Review'
+  '/verify/':
+    get:
+      tags:
+        - Verify
+      summary: Get Verification of Clear Signed Certificate
+      description: ''
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          type: string
+          name: url
+          description: Any accessible url containing a clear signed certificate.
+          required: true
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Verification'
 definitions:
   Review:
     type: object
@@ -92,17 +137,39 @@ definitions:
         type: string
         description: ''
       sha-256:
-        type: string
-        description: ''
+        type: array
+        description: 'array of sha hashes for each reviewed document'
+        items:
+          type: string
+          description: ''
       ipfs-hash:
-        type: string
-        description: ''
+        type: array
+        description: 'array of ipfs hashes for each reviewed document'
+        items:
+          type: string
+          description: ''
       submitted-url:
-        type: string
-        description: ''
+        type: array
+        description: 'array of urls for each submitted url'
+        items:
+          type: string
       submitted-by:
         type: string
         description: ''
+      cert-ipfs-hash:
+        type: string
+        description: ''
+      detach-sig-hash:
+        type: string
+        description: ''
+      clearsigned-hash:
+        type: string
+        description: ''
+  Verification:
+    type: object
+    properties:
+      verification-response:
+        type: string
   ApiResponse:
     type: object
     properties:

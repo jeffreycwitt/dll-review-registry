@@ -32,19 +32,26 @@
   <p>To verify a document with detached signature follow these steps:
     <ul>
       <li>Download the public key of the signing institution (e.g. <a href="/maa-pub.asc">MAA</a>)</li>
-      <li>Import the public key of the signing institution to your key (gpg --import [path/to/downloaded/key]</li>
+      <li>Import the public key of the signing institution to your key ($gpg --import [path/to/downloaded/key]</li>
       <li>Download the detached signature for the certificate in question</li>
       <li>Download the certificate in question</li>
-      <li>Perform verification (gpg --verify [path/to/signature] [path/to/certificate])</li>
+      <li>Perform verification ($gpg --verify [path/to/signature] [path/to/certificate])</li>
     </ul>
   </p>
   <p>
     To verify a document with a clear signed signature follow these steps:
     <ul>
       <li>Download the public key of the signing institution e.g. <a href="/maa-pub.asc">MAA</a>)</li>
-      <li>Import the public key of the signing institution to your key (gpg --import [path/to/downloaded/key]</li>
+      <li>Import the public key of the signing institution to your key ($ gpg --import [path/to/downloaded/key]</li>
       <li>Download the clear signed certificate</li>
-      <li>Perform verification (gpg --verify [path/to/clear/signed/certificate]</li>
+      <li>Perform verification ($ gpg --verify [path/to/clear/signed/certificate]</li>
+      ---
+      <li>To the get the original certificate from the clear signed certificate</li>
+      <li>Run $gpg -d -o original.txt [path/to/clear/signed/certificate]</li>
+      <li>The idenity of the "original.txt" against the unsigned certificate
+        could be further confirmed by comparing the hashes of each file or using
+        the unix diff command ($ diff original.txt path/to/UNSIGNED/certificate)
     </ul>
+
   </p>
 </div>

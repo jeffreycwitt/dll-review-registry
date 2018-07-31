@@ -405,7 +405,9 @@ get '/api/v1/reviews/?:hash?' do |id|
       "ipfs-hash": doc["ipfs-hash"],
       "submitted-url": doc["submitted-url"],
       "submitted-by": doc["submitted-by"],
-      "detach-sig-hash": doc["detach_sig_hash"]
+      "cert-ipfs-hash": doc["cert-ipfs-hash"],
+      "clearsigned-hash": doc["clearsigned-hash"],
+      "detach-sig-hash": doc["detach-sig-hash"]
     }
 
   }.to_json
@@ -429,15 +431,39 @@ get '/api/v1/review/:id' do |id|
       "ipfs-hash": doc["ipfs-hash"],
       "submitted-url": doc["submitted-url"],
       "submitted-by": doc["submitted-by"],
+      "cert-ipfs-hash": doc["cert-ipfs-hash"],
+      "clearsigned-hash": doc["clearsigned-hash"],
       "detach-sig-hash": doc["detach-sig-hash"]
-  }.to_json
+    }.to_json
+end
+get '/api/v1/verify/' do
+  headers( "Access-Control-Allow-Origin" => "*")
+  content_type :json
+  if params[:clearsigned_url]
+    clearsigned_url = if params[:clearsigned_url].include? "https://gateway.scta.info" then
+      params[:clearsigned_url].gsub("https://gateway.scta.info", "http://localhost:8080")
+    elsif params[:clearsigned_url].include? "http://gateway.scta.info"
+      params[:clearsigned_url].gsub("http://gateway.scta.info", "http://localhost:8080")
+    else
+      params[:clearsigned_url]
+    end
+    open("tmp/clearsigned_certificate", "wb") do |file|
+      open(clearsigned_url) do |uri|
+       file.write(uri.read)
+     end
+    end
+    report = `gpg --verify tmp/clearsigned_certificate 2>&1`
+    return {"verification-response": report}.to_json
+  else
+    return {"message": "no clearsigned_url parameter given"}.to_json
+  end
 end
 get '/api/v1/hash' do
   headers( "Access-Control-Allow-Origin" => "*")
   content_type :json
   url = params[:url]
   whitelist = [
-    "http://scta.lombardpress.dev:3000",
+    "http://localhost:3000",
     "http://scta.lombardpress.org",
     "https://scta.lombardpress.org",
     "http://scta-staging.lombardpress.org",

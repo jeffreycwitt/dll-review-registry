@@ -7,7 +7,7 @@
     </div>
     <% if @authorized %>
     <div class="form-group">
-      <label class="control-label" style="width:100%;">Reviewing Society</label>
+      <label class="control-label" style="width:100%;">Review Society</label>
       <select class="form-control" name="review_society">
         <option value="MAA">MAA</option>
         <option value="SCS">SCS</option>
@@ -15,16 +15,16 @@
       </select>
     </div>
     <div class="form-group">
-      <label class="control-label" style="width:100%;">Reviewing Badget Number (e.g. 1, 2)</label>
+      <label class="control-label" style="width:100%;">Review Approval Code (e.g. 1, 2)</label>
       <input class="form-control" type="text" name="review_badge_number"></input>
     </div>
     <% end %>
     <div class="form-group">
-      <label class="control-label" style="width:100%;">Reviewing Summary</label>
+      <label class="control-label" style="width:100%;">Review Summary</label>
       <textarea class="form-control" name="review_summary"></textarea>
     </div>
     <div class="form-group">
-      <label class="control-label" style="width:100%;">Submitted by</label>
+      <label class="control-label" style="width:100%;">Review Submitter</label>
       <input class="form-control" type="text" name="submitted_by" readonly value="<%= @username %>"></input>
     </div>
     <div class="form-group">

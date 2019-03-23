@@ -1,4 +1,4 @@
-def convertUrl(url) do
+def convertUrl(url)
   newUrl = if params[:url].include? "https://gateway.scta.info" then
     url.gsub("https://gateway.scta.info", "http://localhost:8080")
   elsif params[:url].include? "http://gateway.scta.info"

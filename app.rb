@@ -13,6 +13,7 @@ require 'open-uri'
 
 
 require_relative 'lib/badge'
+require_relative 'lib/utils'
 
 CLIENT_ID = ENV['CLIENT_ID']
 CLIENT_SECRET = ENV['CLIENT_SECRET']
@@ -371,7 +372,7 @@ get '/api/v1/reviews/?:hash?' do |id|
   content_type :json
 
   if params[:url] && id.nil?
-    url = params[:url]
+    url = convertUrl(params[:url])
     response = HTTParty.get(url)
     shasum = OpenSSL::Digest::SHA256.hexdigest(response.body)
     id = shasum
@@ -461,7 +462,7 @@ end
 get '/api/v1/hash' do
   headers( "Access-Control-Allow-Origin" => "*")
   content_type :json
-  url = params[:url]
+  url = convertUrl(params[:url])
   whitelist = [
     "http://localhost:3000",
     "http://scta.lombardpress.org",

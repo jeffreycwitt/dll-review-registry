@@ -440,13 +440,13 @@ end
 get '/api/v1/verify/' do
   headers( "Access-Control-Allow-Origin" => "*")
   content_type :json
-  if params[:clearsigned_url]
-    clearsigned_url = if params[:clearsigned_url].include? "https://gateway.scta.info" then
-      params[:clearsigned_url].gsub("https://gateway.scta.info", "http://localhost:8080")
-    elsif params[:clearsigned_url].include? "http://gateway.scta.info"
-      params[:clearsigned_url].gsub("http://gateway.scta.info", "http://localhost:8080")
+  if params[:url]
+    clearsigned_url = if params[:url].include? "https://gateway.scta.info" then
+      params[:url].gsub("https://gateway.scta.info", "http://localhost:8080")
+    elsif params[:url].include? "http://gateway.scta.info"
+      params[:url].gsub("http://gateway.scta.info", "http://localhost:8080")
     else
-      params[:clearsigned_url]
+      params[:url]
     end
     open("tmp/clearsigned_certificate", "wb") do |file|
       open(clearsigned_url) do |uri|
@@ -464,7 +464,7 @@ get '/api/v1/hash' do
   content_type :json
   url = convertUrl(params[:url])
   whitelist = [
-    "http://localhost:3000",
+    #"http://localhost:3000",
     "http://scta.lombardpress.org",
     "https://scta.lombardpress.org",
     "http://scta-staging.lombardpress.org",

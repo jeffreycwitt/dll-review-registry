@@ -13,7 +13,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
-  "host": "dll-review-registry.scta.info",
+  "host": "dll-review-registry.digitallatin.org",
   "basePath": "/api/v1",
   "tags": [
     {
@@ -43,13 +43,6 @@
             "name": "hash",
             "description": "hash of reviewed file. If the url parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.",
             "required": true
-          },
-          {
-            "in": "query",
-            "type": "string",
-            "name": "url",
-            "description": "Any accessible url containing the raw contents of the reviewed file. If this hash parameters is not stated, this parameters is required. If both are stated, the hash will always take precedence.",
-            "required": false
           },
           {
             "in": "query",
@@ -266,6 +259,6 @@
   },
   "externalDocs": {
     "description": "Find out more about the DLL Review Registry",
-    "url": "dll-review-registry.herokuapp.com/about"
+    "url": "dll-review-registry.digitallatin.org/about"
   }
 }
